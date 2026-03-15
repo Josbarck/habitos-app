@@ -1,23 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const initialState = {
-  lista: [
-    { id: 1, nombre: "Hacer ejercicio", dias: 3 },
-    { id: 2, nombre: "Leer 10 minutos", dias: 1 }
-    
+  habitos: [
+    { id: 1, nombre: "Beber agua", done: false },
+    { id: 2, nombre: "Hacer ejercicio", done: false },
+    { id: 3, nombre: "Leer 10 páginas", done: false }
   ]
 }
 
 const habitosSlice = createSlice({
   name: "habitos",
   initialState,
-  reducers: {
-    agregarHabito: (state, action) => {
-      state.lista.push(action.payload)
-    }
-  }
+  reducers: {}
 })
-
-export const { agregarHabito } = habitosSlice.actions
 
 export default habitosSlice.reducer
