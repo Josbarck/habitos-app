@@ -1,48 +1,67 @@
 "use client"
 
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { toggleHabito } from "../store/habitosSlice"
 
 export default function Home() {
+
+  const dispatch = useDispatch()
 
   const habitos = useSelector((state) => state.habitos.habitos)
 
   const completados = habitos.filter(h => h.done).length
-  const progreso = (completados / habitos.length) * 100
+  const progreso = habitos.length > 0 ? (completados / habitos.length) * 100 : 0
 
   return (
-    <div className="p-10 max-w-xl mx-auto">
+    <div className="p-10">
 
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">
-        Seguimiento de Hábitos
+      <h1 className="text-3xl font-bold text-blue-600">
+        App de seguimiento de hábitos
       </h1>
 
-      {/* barra de progreso */}
-      <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
+      <p className="text-gray-600 mb-6">
+        Semana 4 - Lógica de hábitos
+      </p>
+
+      {/* Barra de progreso */}
+
+      <div className="w-full bg-gray-200 rounded-full h-6 mb-6">
         <div
-          className="bg-green-500 h-4 rounded-full"
+          className="bg-blue-500 h-6 rounded-full"
           style={{ width: `${progreso}%` }}
         ></div>
       </div>
 
-      {/* lista de hábitos */}
-      <div className="space-y-3">
+      <p className="mb-6">
+        Progreso: {Math.round(progreso)}%
+      </p>
 
-        {habitos.map((habito) => (
-          <div
-            key={habito.id}
-            className="flex justify-between items-center border p-3 rounded"
+      {/* Lista de hábitos */}
+
+      {habitos.map((habito) => (
+
+        <div
+          key={habito.id}
+          className="flex items-center justify-between bg-white p-4 mb-3 rounded shadow"
+        >
+
+         <div>
+  <p>{habito.nombre}</p>
+  <p className="text-sm text-gray-500">
+    Racha: {habito.streak} días
+  </p>
+</div>
+
+          <button
+            onClick={() => dispatch(toggleHabito(habito.id))}
+            className="bg-green-500 text-white px-4 py-1 rounded"
           >
-            <span>{habito.nombre}</span>
+            Done
+          </button>
 
-            {/* botón done (todavía no funciona) */}
-            <button className="bg-blue-500 text-white px-3 py-1 rounded">
-              Done
-            </button>
+        </div>
 
-          </div>
-        ))}
-
-      </div>
+      ))}
 
     </div>
   )
