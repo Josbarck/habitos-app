@@ -5,67 +5,56 @@ import { useRouter } from "next/navigation"
 
 export default function Login() {
 
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const router = useRouter()
 
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-
-  const login = async () => {
+  const handleLogin = async () => {
 
     const res = await fetch("http://localhost:4000/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        username,
-        password
-      })
+      body: JSON.stringify({ email, password })
     })
 
     const data = await res.json()
 
-    if (data.message === "Login exitoso") {
-
-      router.push("/")
-
-    } else {
-
-      alert(data.message)
-
+    if (!data.token) {
+      alert("Credenciales incorrectas")
+      return
     }
 
+    localStorage.setItem("token", data.token)
+
+    alert("Login correcto")
+
+    router.push("/")
   }
 
   return (
-
-    <div className="p-10">
-
-      <h1 className="text-2xl font-bold mb-6">
-        Login
-      </h1>
+    <div style={{ padding: "20px" }}>
+      <h1>Login</h1>
 
       <input
-        className="border p-2 mr-2"
-        placeholder="Usuario"
-        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Email"
+        onChange={(e) => setEmail(e.target.value)}
       />
 
+      <br /><br />
+
       <input
-        className="border p-2 mr-2"
+        placeholder="Password"
         type="password"
-        placeholder="Contraseña"
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <button
-        onClick={login}
-        className="bg-green-500 text-white px-4 py-2 rounded"
-      >
-        Login
+      <br /><br />
+
+      <button onClick={handleLogin}>
+        Ingresar
       </button>
-
     </div>
-
   )
 }

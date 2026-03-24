@@ -1,54 +1,97 @@
 const express = require("express")
-const bcrypt = require("bcrypt")
 const cors = require("cors")
+const jwt = require("jsonwebtoken")
 
 const app = express()
-
 app.use(cors())
 app.use(express.json())
 
-// Base de datos falsa en memoria
-let usuarios = []
+const PORT = 4000
+const SECRET = "secreto123"
 
-// REGISTRO
-app.post("/register", async (req, res) => {
+let users = []
+let habitos = []
 
-  const { username, password } = req.body
+app.post("/register", (req, res) => {
+  const { email, password } = req.body
 
-  const hash = await bcrypt.hash(password, 10)
+  users.push({ email, password })
 
-  const nuevoUsuario = {
-    username,
-    password: hash
-  }
-
-  usuarios.push(nuevoUsuario)
-
-  res.json({ message: "Usuario registrado" })
-
+  res.json({ mensaje: "Usuario registrado" })
 })
 
-// LOGIN
-app.post("/login", async (req, res) => {
+app.post("/login", (req, res) => {
+  const { email, password } = req.body
 
-  const { username, password } = req.body
+  const user = users.find(
+    u => u.email === email && u.password === password
+  )
 
-  const usuario = usuarios.find(u => u.username === username)
-
-  if (!usuario) {
-    return res.status(401).json({ message: "Usuario no existe" })
+  if (!user) {
+    return res.status(401).json({ mensaje: "Credenciales incorrectas" })
   }
 
-  const valido = await bcrypt.compare(password, usuario.password)
+  const token = jwt.sign({ email: user.email }, SECRET)
 
-  if (!valido) {
-    return res.status(401).json({ message: "Contraseña incorrecta" })
-  }
-
-  res.json({ message: "Login exitoso" })
-
+  res.json({ token })
 })
 
-app.listen(4000, () => {
-  console.log("Servidor backend corriendo en puerto 4000")
+function verificarToken(req, res, next) {
+  const token = req.headers["authorization"]
+
+  if (!token) {
+    return res.status(403).json({ mensaje: "No hay token" })
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET)
+    req.user = decoded
+    next()
+  } catch (error) {
+    res.status(401).json({ mensaje: "Token inválido" })
+  }
+}
+
+app.get("/habitos", verificarToken, (req, res) => {
+  res.json(habitos)
+})
+
+app.post("/habitos", verificarToken, (req, res) => {
+  const { nombre } = req.body
+
+  const nuevo = {
+    id: Date.now(),
+    nombre,
+    done: false,
+    streak: 0
+  }
+
+  habitos.push(nuevo)
+
+  res.json(nuevo)
+})
+
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT)
+})
+
+app.put("/habitos/:id", verificarToken, (req, res) => {
+
+  const { id } = req.params
+
+  habitos = habitos.map(h => {
+  if (h.id == id) {
+
+    const nuevoDone = !h.done
+
+    return {
+      ...h,
+      done: nuevoDone,
+      streak: nuevoDone ? h.streak + 1 : 0
+    }
+  }
+  return h
+})
+
+  res.json({ mensaje: "Hábito actualizado" })
 })

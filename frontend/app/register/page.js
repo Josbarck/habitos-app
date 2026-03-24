@@ -1,58 +1,51 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function Register() {
 
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const router = useRouter()
 
-  const registrar = async () => {
+  const handleRegister = async () => {
 
     await fetch("http://localhost:4000/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        username,
-        password
-      })
+      body: JSON.stringify({ email, password })
     })
 
     alert("Usuario registrado")
 
+    router.push("/login")
   }
 
   return (
+    <div style={{ padding: "20px" }}>
+      <h1>Register</h1>
 
-    <div className="p-10">
-
-      <h1 className="text-2xl font-bold mb-6">
-        Registro
-      </h1>
-
-      <input
-        className="border p-2 mr-2"
-        placeholder="Usuario"
-        onChange={(e) => setUsername(e.target.value)}
+      <input 
+        onChange={(e)=>setEmail(e.target.value)} 
+        placeholder="Email"
       />
 
-      <input
-        className="border p-2 mr-2"
+      <br /><br />
+
+      <input 
+        onChange={(e)=>setPassword(e.target.value)} 
+        placeholder="Password"
         type="password"
-        placeholder="Contraseña"
-        onChange={(e) => setPassword(e.target.value)}
       />
 
-      <button
-        onClick={registrar}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Registrar
+      <br /><br />
+
+      <button onClick={handleRegister}>
+        Registrarse
       </button>
-
     </div>
-
   )
 }
